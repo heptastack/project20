@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+       # Step 1: Set up Docker image tag
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -26,52 +27,57 @@ jobs:
         id: set_tag
         run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
 
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
+      # Step 2: Authenticate to Google Cloud using workload_identity_provider
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
         with:
-          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
-
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
+      
+      # Step 3: Set up Cloud SDK
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
-
+        with:
+          version: 'latest'
       - name: 'Use gcloud CLI'
         run: 'gcloud auth list --filter=status:ACTIVE --format="value(account)"'
+  
+      # Step 4: Use gcloud CLI (optional step for general configuration, etc.)
+      - name: Configure gcloud
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud config set run/region ${{ secrets.GCP_REGION }}
 
-      
-      - name: Login to GAR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{env.REGION}}-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-          #export_default_credentials: true
+      # Step 5: Login to Google Artifact Registry (GAR)
+      - name: Authenticate Docker with Google Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}
 
-      # Build the Docker image
+      # Step 6: Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.GAR_HOST }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:latest .
+          docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/my-app:$TAG .
 
-      # Push the Docker image to Google Artifact Registry
-      - name: Push Docker image to Google Artifact Registry
+      # Step 7: Push Docker image to Google Artifact Registry
+      - name: Push Docker image
         run: |
-          docker push ${{ env.GAR_HOST }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:latest
+          docker push ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/my-app:$TAG
 
-      - name: 'Deploy to Cloud Run'
+      # Step 8: Deploy to Cloud Run
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy my-app \
+            --image ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/my-app:$TAG \
+            --platform managed \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --allow-unauthenticated
 
-        # END - Docker auth and build
-
-        uses: 'google-github-actions/deploy-cloudrun@33553064113a37d688aa6937bacbdc481580be17' # google-github-actions/deploy-cloudrun@v2
-        with:
-          service: '${{ env.SERVICE }}'
-          region: '${{ env.REGION }}'
-          # NOTE: If using a pre-built image, update the image name below:
-
-          image: '${{ env.GAR_HOST }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:latest'
-      # If required, use the Cloud Run URL output in later steps
-      - name: 'gcloud CLI Allowing unauthenticated'
-        run: 'gcloud run services add-iam-policy-binding ${{ env.SERVICE }} --member="allUsers" --role="roles/run.invoker" --region=${{env.REGION}}'      
-      
-      - name: 'Show output'
-        run: |2-
-
-          echo ${{ steps.deploy.outputs.url }}
+      # Step 9: Allow unauthenticated access
+      - name: Allow unauthenticated access
+        run: |
+          gcloud run services add-iam-policy-binding my-app \
+            --region ${{ secrets.GCP_REGION }} \
+            --member="allUsers" \
+            --role="roles/run.invoker" \
+            --platform managed
