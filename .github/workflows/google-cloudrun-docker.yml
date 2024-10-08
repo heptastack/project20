@@ -6,13 +6,11 @@ on:
     #   - main
     tags:
       - v*
-env:
-  PROJECT_ID: heptastack
-  REGION: us-central1
-  SERVICE: next-temp
-  REPOSITORY: heptastack-repo
-  GAR_HOST: us-central1-docker.pkg.dev
-
+      
+permissions:
+  id-token: write
+  contents: read
+      
 jobs:
   build-and-push:
     name: Build && Push && Deploy
