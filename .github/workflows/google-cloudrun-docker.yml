@@ -58,13 +58,13 @@ jobs:
       #docker tag SOURCE-IMAGE LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:TAG
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG .
+          docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/heptastack-repo/${{ secrets.PROJECT_NAME }}:$TAG .
 
 
       # Step 7: Push Docker image to Google Artifact Registry
       - name: Push Docker image
         run: |    
-          docker push ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG
+          docker push ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/heptastack-repo/${{ secrets.PROJECT_NAME }}:$TAG
 
       # Step 8: Deploy to Cloud Run
       - name: Deploy to Cloud Run
