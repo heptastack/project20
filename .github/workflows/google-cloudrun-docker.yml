@@ -23,6 +23,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+    # Step 1.1: Test Secrets
+      - name: Example using another secret
+        run: echo "Secret value is ${{secrets.WORKLOAD_IDENTITY_PROVIDER}}"
+      
       - name: Set Docker image tag
         id: set_tag
         run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
