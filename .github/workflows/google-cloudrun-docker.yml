@@ -70,7 +70,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ secrets.PROJECT_NAME }} \
-            --image ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG \
+            --image ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/heptastack-repo/${{ secrets.PROJECT_NAME }}:$TAG \
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
