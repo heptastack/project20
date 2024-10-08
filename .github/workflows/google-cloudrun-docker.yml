@@ -17,7 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Set up Docker image tag
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 1.1: Set up Docker image tag
       - name: Set up Docker image tag
         id: vars
         run: |
@@ -51,20 +55,22 @@ jobs:
           gcloud auth configure-docker ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}
 
       # Step 6: Build Docker image
+      #docker tag SOURCE-IMAGE LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:TAG
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/my-app:$TAG .
+          docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/${{ secrets.PROJECT_NAME }}:$TAG .
+
 
       # Step 7: Push Docker image to Google Artifact Registry
       - name: Push Docker image
-        run: |
-          docker push ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/my-app:$TAG
+        run: |    
+          docker push ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/${{ secrets.PROJECT_NAME }}:$TAG
 
       # Step 8: Deploy to Cloud Run
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy my-app \
-            --image ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/my-app:$TAG \
+          gcloud run deploy ${{ secrets.PROJECT_NAME }} \
+            --image ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/${{ secrets.PROJECT_NAME }}:$TAG \
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
@@ -73,7 +79,7 @@ jobs:
       # Step 9: Allow unauthenticated access
       - name: Allow unauthenticated access
         run: |
-          gcloud run services add-iam-policy-binding my-app \
+          gcloud run services add-iam-policy-binding ${{ secrets.PROJECT_NAME }}  \
             --region ${{ secrets.GCP_REGION }} \
             --member="allUsers" \
             --role="roles/run.invoker" \
