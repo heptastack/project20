@@ -6,7 +6,7 @@ on:
     #   - main
     tags:
       - v*
-      
+
 permissions:
   id-token: write
   contents: read
@@ -17,17 +17,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-       # Step 1: Set up Docker image tag
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-    # Step 1.1: Test Secrets
-      - name: Example using another secret
-        run: echo "Secret value is ${{secrets.WORKLOAD_IDENTITY_PROVIDER}}"
-      
-      - name: Set Docker image tag
-        id: set_tag
-        run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
+      # Step 1: Set up Docker image tag
+      - name: Set up Docker image tag
+        id: vars
+        run: |
+          TAG=${{ github.sha }}
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
       # Step 2: Authenticate to Google Cloud using workload_identity_provider
       - name: Authenticate to Google Cloud
