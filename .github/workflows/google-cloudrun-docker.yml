@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 1.1: Set up Docker image tag
+      # Step 1.1: Set up Docker image 
       - name: Set up Docker image tag
         id: vars
         run: |
