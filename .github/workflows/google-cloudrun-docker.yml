@@ -1,4 +1,4 @@
-name: Build || Push || Deploy Cloud 
+name: Build || Push || Deploy Cloud
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 permissions:
   id-token: write
   contents: read
-      
+
 jobs:
   build-and-push:
     name: Build && Push && Deploy
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 1.1: Set up Docker image 
+      # Step 1.1: Set up Docker image
       - name: Set up Docker image tag
         id: vars
         run: |
@@ -34,15 +34,15 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
-      
+
       # Step 3: Set up Cloud SDK
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
         with:
-          version: 'latest'
-      - name: 'Use gcloud CLI'
+          version: "latest"
+      - name: "Use gcloud CLI"
         run: 'gcloud auth list --filter=status:ACTIVE --format="value(account)"'
-  
+
       # Step 4: Use gcloud CLI (optional step for general configuration, etc.)
       - name: Configure gcloud
         run: |
@@ -60,10 +60,9 @@ jobs:
         run: |
           docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:latest .
 
-
       # Step 7: Push Docker image to Google Artifact Registry
       - name: Push Docker image
-        run: |    
+        run: |
           docker push ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME}}/${{ secrets.PROJECT_NAME }}:latest
 
       # Step 8: Deploy to Cloud Run
@@ -78,10 +77,5 @@ jobs:
             --allow-unauthenticated
 
       # Step 9: Allow unauthenticated access
-      - name: Allow unauthenticated access
-        run: |
-          gcloud run services add-iam-policy-binding ${{ secrets.PROJECT_NAME }}  \
-            --region ${{ secrets.GCP_REGION }} \
-            --member="allUsers" \
-            --role="roles/run.invoker" \
-            --platform managed
+      - name: "gcloud CLI Allowing unauthenticated"
+        run: 'gcloud run services add-iam-policy-binding ${{ secrets.PROJECT_NAME }}  --member="allUsers" --role="roles/run.invoker" --region=${{env.REGION}}'
