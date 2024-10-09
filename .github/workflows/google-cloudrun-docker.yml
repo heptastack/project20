@@ -55,23 +55,23 @@ jobs:
           gcloud auth configure-docker ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}
 
       # Step 6: Build Docker image
-      #docker tag SOURCE-IMAGE LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:TAG
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG .
 
-
       # Step 7: Push Docker image to Google Artifact Registry
       - name: Push Docker image
         run: |    
-          docker build -t ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME}}/${{ secrets.PROJECT_NAME }}:$TAG .
+          docker push ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG
 
       # Step 8: Deploy to Cloud Run
       - name: Deploy to Cloud Run
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
-          service: ${{ secrets.GCP_PROJECT_ID }}
+          service: ${{ secrets.GCP_CLOUDRUN_SERVICE }}  # Use correct Cloud Run service
           image: ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG
+          region: ${{ secrets.GCP_REGION }}  # Ensure region is passed here
+
       - name: 'Use output'
         run: 'curl "${{ steps.deploy.outputs.url }}"'
 
