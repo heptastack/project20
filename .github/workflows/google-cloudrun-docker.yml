@@ -80,8 +80,9 @@ jobs:
       # Step 9: Allow unauthenticated access
       - name: Allow unauthenticated access
         run: |
-          gcloud run services add-iam-policy-binding ${{ secrets.PROJECT_NAME }}  \
+          gcloud beta run services add-iam-policy-binding ${{ secrets.PROJECT_NAME }}  \
             --region ${{ secrets.GCP_REGION }} \
             --member="allUsers" \
             --role="roles/run.invoker" \
-            --platform managed
+            --project ${{ secrets.GCP_PROJECT_ID }}
+      
