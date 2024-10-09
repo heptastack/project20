@@ -71,7 +71,7 @@ jobs:
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
           service: ${{ secrets.GCP_PROJECT_ID }}
-          image: ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG \
+          image: ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.PROJECT_NAME }}:$TAG
       - name: 'Use output'
         run: 'curl "${{ steps.deploy.outputs.url }}"'
 
