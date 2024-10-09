@@ -76,6 +76,12 @@ jobs:
             --service-account ${{ secrets.GCLOUD_SERVICE_ACCOUNT }} \
             --allow-unauthenticated
 
-      # Step 9: Allow unauthenticated access
-      - name: "gcloud CLI Allowing unauthenticated"
-        run: 'gcloud run services add-iam-policy-binding ${{ secrets.PROJECT_NAME }}  --member="allUsers" --role="roles/run.invoker" --region=${{env.REGION}}'
+      # Step 9: Allow authenticated access (replace unauthenticated access with authenticated users)
+      - name: Allow authenticated access
+        run: |
+          gcloud run services add-iam-policy-binding ${{ secrets.PROJECT_NAME }}  \
+            --region ${{ secrets.GCP_REGION }} \
+            --member="allAuthenticatedUsers" \
+            --role="roles/run.invoker" \
+            --platform managed
+
