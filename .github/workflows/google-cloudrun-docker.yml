@@ -53,7 +53,6 @@ jobs:
       - name: Authenticate Docker with Google Artifact Registry
         run: |
           gcloud auth configure-docker ${{ secrets.GCP_ARTIFACT_REGISTRY_HOST }}
-          gcloud auth activate-service-account ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
 
       # Step 6: Build Docker image
       #docker tag SOURCE-IMAGE LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:TAG
