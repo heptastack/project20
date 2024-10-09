@@ -25,7 +25,7 @@ jobs:
       - name: Set up Docker image tag
         id: vars
         run: |
-          TAG=${{ github.sha }}
+          TAG=latest
           echo "TAG=$TAG" >> $GITHUB_ENV
 
       # Step 2: Authenticate to Google Cloud using workload_identity_provider
