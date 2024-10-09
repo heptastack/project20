@@ -74,6 +74,7 @@ jobs:
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
+            --service-account ${{ secrets.GCLOUD_SERVICE_ACCOUNT }} \
             --allow-unauthenticated
 
       # Step 9: Allow unauthenticated access
